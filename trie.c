@@ -9,7 +9,7 @@ struct trie {
 	char *content;
 };
 
-struct trie* find(char ch, struct trie *node) {
+struct trie* get_child(char ch, struct trie *node) {
 	for(int i=0; i<node->child_count; i++)
 		if(node->children[i]->ch == ch)
 			return node->children[i];
@@ -36,7 +36,7 @@ void add_word(struct trie *root, char *word, char *content) {
 	struct trie *curr = root;
 	struct trie *next = NULL;
 	for(int i=0; i<word_len; i++) {
-		next = find(word[i], curr);
+		next = get_child(word[i], curr);
 		if(next == NULL) {
 			next = create(word[i]);
 			link(curr, next);
@@ -57,12 +57,29 @@ void print_trie(struct trie *root, int level) {
 		print_trie(root->children[i], level+1); 
 }
 
+char* get_meaning(char* word, struct trie *root) {
+	struct trie *child = get_child(word[0], root);
+	if(child == NULL) return NULL;
+	if(strlen(word) == 1) return child->content; // This is bad!! Should return a copy, not the reference! 
+	return get_meaning(&word[0], child);
+}
+
 int main(int argc, char **argv) {
 	struct trie *root = create('*'); 
 	char word[100], content[1000], dump;
-	while(scanf("%s %[^\n]s", &word, &content) != EOF) {
+	printf("dictionary loading ...\n");
+	while(scanf("%s %[^\n]s", word, content) != EOF) {
 		add_word(root, word, content);
 	}
-	print_trie(root, 0);
+	add_word(root, word, content);
+	printf("done.\n");
+	//print_trie(root, 0);
+	printf("Type a word for a meaning\n");
+	while(scanf("%[^\n]s", word) != EOF) {
+		scanf("%s", word);
+		char* meaning = get_meaning(word, root);
+		if (meaning == NULL) printf("%s: WORD NOT FOUND!\n\n", word);
+		else printf("%s\n\n", meaning);
+	}
 	return 0;
 }
