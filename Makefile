@@ -2,11 +2,14 @@ CC=gcc
 CFLAGS=-g
 LDFLAGS=
 
-all: trie
+all: build build/trie 
 
-bin/trie: trie.c.o
+build/trie: src/trie.c 
 	$(CC) $(CFLAGS) $(LDFLAGS) $? -o $@
+
+build:
+	mkdir -p $(BUILD_DIR)
 
 .PHONY: clean
 clean:
-	rm -rf bin/
+	rm -rf $(BUILD_DIR)
